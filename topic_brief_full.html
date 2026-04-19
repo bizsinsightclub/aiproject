@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 친화적 데이터셋과 기업 지능화 전략</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black:#000; --white:#fff; --gray:#666; --lgray:#e0e0e0;
+    --d-bg:#0f172a; --d-card:#1e293b; --d-border:#334155;
+    --d-text:#e2e8f0; --d-muted:#94a3b8; --d-dim:#475569;
+    --red:#dc2626; --red-h:#b91c1c;
+  }
+  body { font-family: 'Pretendard','Noto Sans KR',sans-serif; }
+  button { cursor:pointer; font-family:inherit; }
+
+  /* ── 탭바 ── */
+  #toggle-bar {
+    position:fixed; top:0; left:0; right:0; z-index:200;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--d-bg); border-bottom:1px solid var(--d-card);
+    padding:10px 20px;
+  }
+  .org-label { font-size:11px; font-weight:700; color:var(--d-dim); letter-spacing:.1em; margin-right:16px; }
+  .tab-btn {
+    padding:7px 28px; font-size:12px; font-weight:700;
+    letter-spacing:.08em; text-transform:uppercase;
+    border:none; background:transparent; color:var(--d-dim); transition:all .2s;
+  }
+  .tab-btn.active { color:#fff; background:var(--red); border-radius:6px; }
+  .tab-btn:not(.active):hover { color:var(--d-muted); }
+  .tab-div { width:1px; height:16px; background:var(--d-border); margin:0 4px; }
+
+  .view { display:none; }
+  .view.active { display:block; }
+
+  /* ════ BRIEF ════ */
+  #view-brief { background:#f0f0f0; min-height:100vh; padding:72px 20px 40px; }
+  .page { width:794px; min-height:1000px; background:var(--white); padding:46px 52px 52px; margin:0 auto; }
+  .b-header { display:flex; justify-content:space-between; align-items:baseline; font-size:8.5px; font-weight:600; color:var(--gray); letter-spacing:.02em; }
+  .b-header-sub { font-size:8px; font-weight:300; color:var(--gray); margin-top:3px; }
+  .b-hr  { border:none; border-top:.5px solid var(--black); margin:6px 0; }
+  .headline { margin:22px 0; }
+  .headline h1 { font-size:30px; font-weight:900; color:var(--black); line-height:1.15; letter-spacing:-.02em; }
+  .headline h2 { font-size:13.5px; font-weight:700; color:var(--black); margin-top:10px; line-height:1.4; letter-spacing:-.01em; }
+  .headline .sub { font-size:11.5px; font-weight:300; color:var(--gray); margin-top:5px; line-height:1.5; }
+  .section { margin-top:20px; }
+  .section-label { font-size:10.5px; font-weight:900; color:var(--black); letter-spacing:-.01em; margin-bottom:6px; }
+  .section p { font-size:11.5px; font-weight:400; color:var(--black); line-height:1.75; word-break:keep-all; }
+  .section p+p { margin-top:8px; }
+  .proposition { background:var(--black); color:var(--white); padding:14px 20px 15px; margin:20px 0; line-height:1.65; }
+  .proposition p { font-size:12px; color:var(--white); }
+  .proposition strong { font-weight:700; }
+  .step-table,.contrib-table { width:100%; border-collapse:collapse; margin-top:12px; }
+  .step-table td,.contrib-table td { padding:9px 0 8px; font-size:10.5px; vertical-align:middle; border-top:.5px solid var(--lgray); line-height:1.5; word-break:keep-all; }
+  .step-table tr:last-child td,.contrib-table tr:last-child td { border-bottom:.5px solid var(--lgray); }
+  .td-num  { width:54px; font-size:8.5px; font-weight:700; color:var(--gray); letter-spacing:.02em; }
+  .td-step { width:60px; font-size:11.5px; font-weight:700; color:var(--black); }
+  .td-desc { font-size:10.5px; font-weight:400; color:var(--black); }
+  .td-ckey { width:52px; font-size:9px; font-weight:700; color:var(--gray); }
+  .td-cval { font-size:10.5px; font-weight:400; color:var(--black); }
+
+  /* ════ QnA ════ */
+  #view-qna { background:var(--d-bg); min-height:100vh; padding:72px 32px 60px; }
+  .qna-wrap { max-width:1200px; margin:0 auto; }
+  .qna-head { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid var(--d-border); padding-bottom:20px; margin-bottom:28px; gap:16px; flex-wrap:wrap; }
+  .qna-title { font-size:28px; font-weight:900; color:var(--red); letter-spacing:-.04em; text-transform:uppercase; font-style:italic; }
+  .qna-sub { font-size:11px; color:var(--d-muted); margin-top:4px; }
+  .qna-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .btn-export { padding:8px 16px; background:var(--d-card); color:var(--white); border:1px solid var(--d-border); border-radius:8px; font-size:13px; font-weight:700; transition:background .2s; }
+  .btn-export:hover { background:var(--d-border); }
+  .btn-add { padding:8px 16px; background:var(--red); color:var(--white); border:none; border-radius:8px; font-size:13px; font-weight:700; transition:background .2s; }
+  .btn-add:hover { background:var(--red-h); }
+  .btn-reset { font-size:11px; color:var(--d-dim); background:none; border:none; text-decoration:underline; transition:color .2s; }
+  .btn-reset:hover { color:var(--red); }
+
+  /* 카드 그리드 */
+  #card-list { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  @media(max-width:900px){ #card-list{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:560px){ #card-list{ grid-template-columns:1fr; } }
+
+  /* 플립 카드 */
+  .card-wrap { height:26rem; perspective:1000px; }
+  .card-inner { position:relative; width:100%; height:100%; transition:transform .6s; transform-style:preserve-3d; cursor:pointer; }
+  .card-inner.is-flipped { transform:rotateY(180deg); }
+  .card-front,.card-back {
+    backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    position:absolute; inset:0; border-radius:14px; box-shadow:0 10px 30px -5px rgba(0,0,0,.4);
+  }
+  .card-front { background:#1e293b; border:1px solid var(--d-border); padding:28px; display:flex; flex-direction:column; justify-content:space-between; transition:border-color .3s; }
+  .card-front:hover { border-color:rgba(220,38,38,.4); }
+  .card-top { display:flex; justify-content:space-between; align-items:flex-start; }
+  .card-cat { font-size:9.5px; font-weight:900; background:rgba(220,38,38,.1); color:#f87171; padding:4px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.1em; user-select:none; }
+  .card-meta { display:flex; align-items:center; gap:8px; }
+  .card-id { font-family:monospace; font-size:11px; color:var(--d-dim); }
+  .btn-del { background:none; border:none; color:var(--d-border); padding:4px; transition:color .2s; }
+  .btn-del:hover { color:#f87171; }
+  .btn-del svg { width:15px; height:15px; display:block; }
+  .card-q { font-size:17px; font-weight:900; color:var(--white); line-height:1.4; margin-top:18px; font-style:italic; word-break:keep-all; user-select:none; }
+  .card-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; }
+  .card-tag { font-size:10px; padding:3px 9px; background:var(--d-bg); color:var(--d-muted); border:1px solid var(--d-border); border-radius:6px; font-weight:700; user-select:none; }
+  .card-bottom { display:flex; justify-content:space-between; align-items:center; user-select:none; }
+  .card-hint { font-size:9.5px; font-weight:700; color:var(--d-dim); letter-spacing:.12em; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+  .btn-edit { padding:5px 14px; background:var(--d-card); color:var(--d-muted); border:none; border-radius:7px; font-size:11px; font-weight:700; transition:background .2s,color .2s; }
+  .btn-edit:hover { background:var(--red); color:var(--white); }
+  .card-back { transform:rotateY(180deg); background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%); border:2px solid rgba(220,38,38,.35); padding:28px; display:flex; flex-direction:column; justify-content:space-between; }
+  .card-a-scroll { overflow-y:auto; flex:1; padding-right:6px; }
+  .card-a-scroll::-webkit-scrollbar { width:3px; }
+  .card-a-scroll::-webkit-scrollbar-thumb { background:var(--red); border-radius:4px; }
+  .card-a { font-size:13.5px; line-height:1.75; color:#f1f5f9; font-weight:500; word-break:keep-all; }
+  .card-back-foot { display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,.08); padding-top:12px; margin-top:10px; }
+  .card-back-label { font-size:9.5px; font-weight:900; color:#f87171; letter-spacing:.12em; text-transform:uppercase; }
+  .card-back-ver { font-size:8.5px; color:rgba(255,255,255,.2); text-transform:uppercase; font-weight:700; }
+
+  /* ════ 모달 ════ */
+  #modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.88); display:none; align-items:center; justify-content:center; padding:16px; z-index:300; }
+  #modal-overlay.open { display:flex; }
+  .modal-box { background:#1e293b; width:100%; max-width:640px; border-radius:18px; padding:36px; border:1px solid var(--d-border); box-shadow:0 25px 60px rgba(0,0,0,.5); }
+  .modal-title { font-size:20px; font-weight:700; color:#f87171; font-style:italic; text-decoration:underline; text-underline-offset:6px; margin-bottom:24px; }
+  .modal-field { margin-bottom:14px; }
+  .modal-label { display:block; font-size:10px; font-weight:700; color:var(--d-dim); text-transform:uppercase; letter-spacing:.12em; margin-bottom:5px; }
+  .modal-input,.modal-textarea { width:100%; background:var(--d-bg); border:1px solid var(--d-border); border-radius:8px; padding:11px 13px; color:var(--d-text); font-size:14px; font-family:inherit; outline:none; transition:border-color .2s; }
+  .modal-input:focus,.modal-textarea:focus { border-color:var(--red); }
+  .modal-textarea { height:140px; resize:vertical; line-height:1.6; }
+  .modal-actions { display:flex; justify-content:flex-end; gap:14px; margin-top:24px; }
+  .btn-cancel { padding:9px 22px; background:none; border:none; color:var(--d-muted); font-size:13px; font-weight:600; transition:color .2s; }
+  .btn-cancel:hover { color:var(--white); }
+  .btn-save { padding:9px 28px; background:var(--red); color:var(--white); border:none; border-radius:10px; font-size:13px; font-weight:700; transition:background .2s; }
+  .btn-save:hover { background:var(--red-h); }
+</style>
+</head>
+<body>
+
+<div id="toggle-bar">
+  <span class="org-label">9조 &nbsp;·&nbsp; KAIST MBA</span>
+  <button class="tab-btn active" onclick="switchView('brief',this)">TOPIC BRIEF</button>
+  <div class="tab-div"></div>
+  <button class="tab-btn" onclick="switchView('qna',this)">Q&amp;A CARDS</button>
+</div>
+
+<!-- BRIEF -->
+<div id="view-brief" class="view active">
+  <div class="page">
+    <div class="b-header">
+      <span>KAIST Professional MBA &nbsp;·&nbsp; 기말 프로젝트 주제 제안 &nbsp;·&nbsp; 2025. 04. 19</span>
+      <span>9조</span>
+    </div>
+    <div class="b-header-sub">장활훈 &nbsp;·&nbsp; 김민석 &nbsp;·&nbsp; 최순영 &nbsp;·&nbsp; 진현선 &nbsp;·&nbsp; 성철한 &nbsp;·&nbsp; 이창호 &nbsp;·&nbsp; 김원진</div>
+    <hr class="b-hr">
+    <div class="headline">
+      <h1>AI 친화적 데이터셋과<br>기업 지능화 전략</h1>
+      <h2>지식 액체화(Knowledge Liquefaction)를 통한 의사결정 품질의 구조적 향상</h2>
+      <p class="sub">AI 도입 성과를 결정하는 것은 모델이 아닌, 조직 지식의 구조화 수준이다</p>
+    </div>
+    <hr class="b-hr">
+    <div class="section">
+      <div class="section-label">주제 선정 배경</div>
+      <p>기업의 AI 도입이 가속화되고 있지만, 대부분의 성과는 개인 단위의 생산성 향상에 머문다. 파편화된 툴 도입의 집합이 조직 지능으로 이어지지 않는 이유는 모델의 한계가 아니다. 조직이 축적해온 지식 — 의사결정 맥락, 실패 사례, 도메인 노하우 — 이 AI가 처리할 수 있는 형태로 존재하지 않는다는 구조적 문제에 있다.</p>
+    </div>
+    <div class="proposition">
+      <p><strong>AI 도입의 성과 격차는 모델 차이가 아닌 — 데이터 구조화 수준의 차이다.</strong></p>
+      <p>AI가 읽을 수 없는 지식은, 존재하지 않는 지식과 같다.</p>
+    </div>
+    <div class="section">
+      <div class="section-label">핵심 문제의식</div>
+      <p>기업의 핵심 지식은 대부분 AI가 처리하기 어려운 포맷 — 구조가 시각 디자인에 묻힌 문서, 맥락 없이 단절된 파일, 개인의 머릿속에만 존재하는 암묵지 — 에 갇혀 있다. AI에게 공급되는 데이터의 품질이 곧 AI 시스템의 성능 상한선이 된다는 점에서, "AI 친화적 데이터셋"의 설계는 기술이 아닌 전략의 문제다.</p>
+      <p>이 연구는 "어떤 조건을 갖춘 데이터셋이 AI 친화적인가"를 핵심 질문으로 삼아, 구조적 명확성·맥락 보존·검색 가능성의 세 축에서 기업 지식 자산의 현황을 진단하고, 이를 재구조화하는 지식 액체화 전략의 이론적·실증적 토대를 마련한다.</p>
+    </div>
+    <div class="section">
+      <div class="section-label">연구 방향 — 3단계 전략 프레임워크</div>
+      <p>"AI 친화적 데이터셋"의 개념을 정의하고, 이를 기업 환경에 구현하기 위한 진단-액체화-연결의 3단계 프레임워크를 제시한다. 각 단계는 현황 측정, 지식 구조화 파이프라인 설계, AI 기반 추론 시스템과의 통합으로 구성되며, 최종 목표는 비용 절감이 아닌 의사결정 품질의 구조적 향상이다.</p>
+      <table class="step-table">
+        <tr><td class="td-num">STEP 1</td><td class="td-step">진단</td><td class="td-desc">"AI 친화적" 기준을 정의하고 현재 기업 지식 자산의 구조화 수준을 측정</td></tr>
+        <tr><td class="td-num">STEP 2</td><td class="td-step">액체화</td><td class="td-desc">암묵지·비정형 문서를 구조적 명확성·맥락 보존·검색 가능성 기준으로 재설계</td></tr>
+        <tr><td class="td-num">STEP 3</td><td class="td-step">연결</td><td class="td-desc">구조화된 지식 자산을 AI 추론 시스템에 통합 — 전략적 의사결정 지원 체계 완성</td></tr>
+      </table>
+    </div>
+    <div class="section">
+      <div class="section-label">기대 기여</div>
+      <table class="contrib-table">
+        <tr><td class="td-ckey">개념적</td><td class="td-cval">"AI 친화적 데이터셋"의 구성 요건을 이론화 — 기업 지식 자산 평가의 새 기준 제시</td></tr>
+        <tr><td class="td-ckey">전략적</td><td class="td-cval">지식 액체화를 AX 전략의 선행 조건으로 위치시키는 실행 프레임워크 제안</td></tr>
+        <tr><td class="td-ckey">실증적</td><td class="td-cval">실제 기업 사례를 통해 진단→액체화→연결의 3단계 로드맵을 적용·검증</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- QnA -->
+<div id="view-qna" class="view">
+  <div class="qna-wrap">
+    <div class="qna-head">
+      <div>
+        <div class="qna-title">QnA List</div>
+        <div class="qna-sub">Knowledge Liquefaction Q&amp;A — 예상 질문 대응 카드</div>
+      </div>
+      <div class="qna-actions">
+        <button class="btn-export" onclick="exportToHTML()">내보내기</button>
+        <button class="btn-add" onclick="openAddModal()">카드 추가</button>
+        <button class="btn-reset" onclick="resetData()">초기화</button>
+      </div>
+    </div>
+    <div id="card-list"></div>
+  </div>
+</div>
+
+<!-- 모달 -->
+<div id="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">STRATEGIC DATA ENTRY</div>
+    <div class="modal-field"><label class="modal-label">분류</label><input type="text" id="modal-category" class="modal-input"></div>
+    <div class="modal-field"><label class="modal-label">예상 질문</label><input type="text" id="modal-question" class="modal-input"></div>
+    <div class="modal-field"><label class="modal-label">대응 답변</label><textarea id="modal-answer" class="modal-textarea"></textarea></div>
+    <div class="modal-field"><label class="modal-label">핵심 키워드 (쉼표 구분)</label><input type="text" id="modal-tags" placeholder="키워드1, 키워드2" class="modal-input"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
+      <button class="btn-save" onclick="saveData()">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchView(target,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+target).classList.add('active');
+  btn.classList.add('active');
+}
+const initialQuestions=[
+  {id:1,category:"Concept",q:"기존 KMS(Knowledge Management System:지식관리시스템)와 '지식 액체화'의 본질적인 차이는 무엇인가?",a:"과거 KMS는 인간의 열람을 목적으로 한 지식 저장소였다면, 지식 액체화는 AI의 추론을 목적으로 한 '기계 판독형(Machine-Readable)' 데이터 구조를 지향합니다. 단순히 검색하는 수준을 넘어, 생성형 AI가 즉시 컨텍스트로 활용할 수 있는 상태로 만드는 것이 핵심입니다.",tags:["KMS vs 액체화","기계 판독성","RAG 최적화","지식 자산화"]},
+  {id:2,category:"Execution",q:"AI에게 맥락(Context)을 전달하는 구체적인 기술적 방식은?",a:"단순한 텍스트 추출을 넘어 '메타데이터 설계'와 '지식 그래프(Knowledge Graph)' 구조를 도입합니다. 의사결정의 배경, 결과, 이해관계자 간의 관계성을 벡터화하거나 구조화된 태그로 연결함으로써 AI가 데이터 간의 인과관계를 이해하도록 유도합니다.",tags:["메타데이터","지식 그래프","인과관계 추론","벡터 DB"]},
+  {id:3,category:"Identity",q:"왜 굳이 '액체화(Liquefaction)'라는 단어를 선택했는가?",a:"문서(고체)라는 단절된 형태를 깨고, 어떤 용기(AI 모델이나 프롬프트)에도 자유롭게 담겨 흐를 수 있는 유연한 데이터 구조로의 변환을 상징합니다. 고착화된 지식을 동적 지능으로 전환한다는 전략적 의지입니다.",tags:["네이밍 전략","지식의 유연성","동적 지능","데이터 변환"]},
+  {id:4,category:"Metrics",q:"STEP 1 진단 단계에서 구조화 수준을 측정하는 지표는?",a:"데이터의 기계 판독성(Machine Readability), 비정형 데이터 내 메타데이터 밀도, 지식 파편화 정도를 나타내는 'Silo 지표' 등 본 연구에서 도출할 5~7개의 정량·정성적 지표를 활용해 측정합니다.",tags:["구조화 진단","Silo 지표","데이터 밀도","수준 측정"]},
+  {id:5,category:"Efficiency",q:"방대한 레거시 데이터를 모두 액체화하는 것이 효율적인가?",a:"아닙니다. 모든 데이터를 변환하지 않습니다. 기업의 핵심 경쟁 우위와 직결된 '전략적 지식 자산'을 선별하고 우선순위를 정하는 '선택과 집중' 전략이 본 프레임워크의 필수 전제입니다.",tags:["ROI 최적화","데이터 선별","선택과 집중","레거시 활용"]},
+  {id:6,category:"Culture",q:"개인 머릿속의 암묵지 추출 시 발생하는 저항은 어떻게 해결하나?",a:"이것은 기술이 아닌 보상과 문화의 문제입니다. 지식을 공유하는 행위가 AI 에이전트를 통해 개인의 업무 부담을 실질적으로 줄여주는 경험을 제공함으로써, 자발적 참여를 유도하는 인센티브 메커니즘을 설계합니다.",tags:["암묵지 추출","변화 관리","인센티브 설계","AI 비서"]},
+  {id:7,category:"Risk",q:"PDF/이미지 추출 시 발생하는 오류(Hallucination) 대책은?",a:"지식 액체화 파이프라인 중간에 인간의 피드백을 반영하는 'Human-in-the-loop' 검증 프로세스나 RLHF를 배치하여 데이터의 무결성을 확보하는 구조를 제안합니다.",tags:["데이터 무결성","Hallucination 방지","RLHF","검증 파이프라인"]},
+  {id:8,category:"Value",q:"의사결정 품질의 향상을 어떻게 정량적으로 측정할 것인가?",a:"정보 탐색 시간의 단축, 의사결정 시 고려된 변수의 확장성(데이터 포괄성), 사후 평가 시 예측치와 실제치 사이의 오차 감소 등을 핵심 성과 지표(KPI)로 활용하여 측정합니다.",tags:["의사결정 품질","KPI 설정","성과 측정","데이터 포괄성"]},
+  {id:9,category:"Future",q:"최신 모델(GPT-5 등)이 나오면 데이터 구조화 없이도 해결되지 않나?",a:"범용 모델이 발전해도 기업 고유의 내부 맥락과 도메인 노하우는 외부에 없습니다. 오히려 모델의 성능이 높을수록, 정제되고 구조화된 내부 데이터를 공급받을 때 경쟁사와의 성과 격차는 더 크게 벌어집니다.",tags:["모델 vs 데이터","도메인 특화","경쟁 우위","LLM 에코시스템"]},
+  {id:10,category:"Organization",q:"이 전략을 위해 조직 내에 새로 필요한 역할(Role)은?",a:"기술적 이해도와 비즈니스 언어를 동시에 구사하는 '지식 아키텍트(Knowledge Architect)' 혹은 'AI 지식 전략가'가 필요합니다. 이들은 지식의 가치를 판별하고 재구조화하는 핵심 거버넌스 역할을 수행합니다.",tags:["조직 설계","신규 Role","지식 아키텍트","거버넌스"]},
+  {id:11,category:"Security",q:"데이터 보안과 지식 액체화 사이의 상충은 어떻게 해결하나?",a:"액체화 과정에서 '권한 계층(Permission Layer)'을 데이터와 함께 구조화합니다. AI 추론 시 사용자의 권한에 부합하는 지식에만 접근하도록 설계하는 보안 프로토콜을 프레임워크에 통합합니다.",tags:["데이터 보안","권한 관리","보안 프로토콜","데이터 접근 제어"]},
+  {id:12,category:"Scalability",q:"인프라가 부족한 중소기업에게도 이 전략이 유효한가?",a:"규모보다는 '지식 집약도'의 문제입니다. 소규모 조직이라도 도메인 노하우가 확실하다면, 적은 양의 고품질 액체화 데이터셋이 대기업의 파편화된 데이터보다 훨씬 강력한 AI 성능을 낼 수 있습니다.",tags:["중소기업 AI","지식 집약도","데이터 효율성","민첩성"]},
+  {id:13,category:"Sustainability",q:"시간이 지나 데이터가 다시 고착화되는 현상은 어떻게 막나?",a:"일회성 프로젝트가 아닌, 데이터 생성 시점부터 액체화 형태로 저장되는 '지식 선순환 파이프라인(Data Flywheel)'을 구축합니다. 이를 통해 지식의 현행화를 자동화하는 체계를 지향합니다.",tags:["데이터 플라이휠","지식 현행화","자동화 파이프라인","지속 가능성"]},
+  {id:14,category:"Application",q:"실제 검증을 위해 어떤 업종을 타겟으로 하고 있는가?",a:"프로젝트 문서, 도면, 공정 노하우 등 비정형 데이터 비중이 높고 의사결정 맥락이 매우 복잡한 '건설/엔지니어링' 및 '전략 컨설팅' 분야를 최우선 타겟으로 고려하고 있습니다.",tags:["타겟 업종","건설/엔지니어링","비정형 데이터","도메인 적용"]},
+  {id:15,category:"Message",q:"경영진에게 전달할 가장 강력한 한 문장은?",a:"AI 모델에 투자하기 전, 우리 회사의 지식이 AI가 읽을 수 있는 상태인지부터 점검하십시오. AI가 읽지 못하는 지식은 자산이 아니라 부채입니다.",tags:["경영 메시지","자산 vs 부채","투자 우선순위","AX 임팩트"]},
+  {id:16,category:"Technical",q:"지식 액체화가 RAG(검색 증강 생성) 성능에 미치는 영향은?",a:"RAG의 핵심은 '얼마나 정확한 문맥을 찾아주느냐'입니다. 액체화된 데이터셋은 검색 성능(Recall/Precision)을 비약적으로 높여 Hallucination을 최소화하고 AI 응답의 신뢰도를 결정적으로 향상시킵니다.",tags:["RAG 최적화","신뢰도 향상","검색 성능","컨텍스트 품질"]},
+  {id:17,category:"Strategy",q:"지식 액체화가 기업의 AI 전환(AX) 로드맵에서 갖는 위치는?",a:"기술 도입 이전의 '전략적 정지 작업'입니다. 집을 짓기 전 땅을 고르는 작업처럼, 지식 액체화는 기업 지능화를 위한 가장 선행되어야 할 '기초 공사'이자 핵심 인프라 구축 단계입니다.",tags:["AX 로드맵","선행 조건","인프라 구축","기초 공사"]},
+  {id:18,category:"Case Study",q:"글로벌 벤치마킹 사례 중 본 연구와 결이 같은 사례는?",a:"모건스탠리가 OpenAI와 협업하여 내부 자산을 구조화해 PB들의 의사결정을 돕는 'Morgan Stanley Assistant'가 좋은 예입니다. 데이터의 양보다 '구조화된 지식의 질'로 승부한 대표적 액체화 사례입니다.",tags:["모건스탠리","글로벌 사례","지식 구조화","성공 모델"]},
+  {id:19,category:"Implementation",q:"프로젝트 수행 시 가장 큰 기술적 병목은 무엇으로 예상하나?",a:"다양한 포맷(PDF, CAD, 메신저 등)에 흩어진 데이터의 '의미적 연결(Semantic Link)'을 자동화하는 것입니다. 멀티모달 AI 기술과 정교한 온톨로지 설계를 병행해야 합니다.",tags:["기술적 병목","멀티모달","의미적 연결","온톨로지"]},
+  {id:20,category:"Leadership",q:"액체화 전략의 성공을 위해 필요한 리더십의 형태는?",a:"데이터를 IT 부서의 관리 대상으로만 보지 않고 '전략적 자산'으로 인식하는 리더십이 필수적입니다. 부서 간 데이터 Silo를 깨고 지식의 흐름을 장려하는 '데이터 개방형 리더십'이 핵심 동력입니다.",tags:["리더십 가이드","Silo 파괴","데이터 개방성","전략적 인식"]}
+];
+let questions=JSON.parse(localStorage.getItem('mba_qna_v9'))||initialQuestions;
+let editingId=null,isAdding=false;
+function renderCards(){
+  document.getElementById('card-list').innerHTML=questions.map(item=>`
+    <div class="card-wrap">
+      <div class="card-inner" id="card-${item.id}" onclick="toggleCard(${item.id})">
+        <div class="card-front">
+          <div>
+            <div class="card-top">
+              <span class="card-cat">${item.category}</span>
+              <div class="card-meta">
+                <button class="btn-del" onclick="event.stopPropagation();deleteCard(${item.id})">
+                  <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                </button>
+                <span class="card-id">LOG_${String(item.id).padStart(2,'0')}</span>
+              </div>
+            </div>
+            <div class="card-q">${item.q}</div>
+            <div class="card-tags">${item.tags.map(t=>`<span class="card-tag">#${t}</span>`).join('')}</div>
+          </div>
+          <div class="card-bottom">
+            <span class="card-hint">REVEAL ANSWER</span>
+            <button class="btn-edit" onclick="event.stopPropagation();openEditModal(${item.id})">EDIT</button>
+          </div>
+        </div>
+        <div class="card-back">
+          <div class="card-a-scroll"><p class="card-a">${item.a}</p></div>
+          <div class="card-back-foot">
+            <span class="card-back-label">Tactical Response</span>
+            <span class="card-back-ver">Knowledge Liquefaction</span>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function toggleCard(id){document.getElementById('card-'+id).classList.toggle('is-flipped');}
+function openAddModal(){
+  isAdding=true;editingId=null;
+  document.getElementById('modal-title').textContent='ADD NEW CARD';
+  ['modal-category','modal-question','modal-answer','modal-tags'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function openEditModal(id){
+  isAdding=false;editingId=id;
+  const item=questions.find(q=>q.id===id);
+  document.getElementById('modal-title').textContent='EDIT CARD';
+  document.getElementById('modal-category').value=item.category;
+  document.getElementById('modal-question').value=item.q;
+  document.getElementById('modal-answer').value=item.a;
+  document.getElementById('modal-tags').value=item.tags.join(', ');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function saveData(){
+  const category=document.getElementById('modal-category').value.trim();
+  const q=document.getElementById('modal-question').value.trim();
+  const a=document.getElementById('modal-answer').value.trim();
+  const tags=document.getElementById('modal-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  if(!category||!q||!a)return alert('필수 항목을 입력하세요.');
+  if(isAdding){const nextId=Math.max(...questions.map(i=>i.id),0)+1;questions.push({id:nextId,category,q,a,tags});}
+  else{const idx=questions.findIndex(i=>i.id===editingId);if(idx!==-1)questions[idx]={...questions[idx],category,q,a,tags};}
+  localStorage.setItem('mba_qna_v9',JSON.stringify(questions));
+  renderCards();closeModal();
+}
+function deleteCard(id){
+  if(confirm('삭제하시겠습니까?')){questions=questions.filter(i=>i.id!==id);localStorage.setItem('mba_qna_v9',JSON.stringify(questions));renderCards();}
+}
+function resetData(){
+  if(confirm('초기화하시겠습니까?')){localStorage.removeItem('mba_qna_v9');questions=[...initialQuestions];renderCards();}
+}
+function exportToHTML(){
+  const blob=new Blob([document.documentElement.outerHTML],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='MBA_Knowledge_Liquefaction.html';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+window.onload=renderCards;
+</script>
+</body>
+</html>
